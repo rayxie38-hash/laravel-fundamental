@@ -8,6 +8,7 @@ use App\Models\Item;
 use App\Models\Loan;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -35,7 +36,25 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
 
-            return view('dashboard', compact('stats', 'recentActivities', 'pendingLoans'));
+            // Monthly loan counts for chart
+            $monthlyLoans = Loan::select(
+                DB::raw('MONTH(loan_date) as month_number'),
+                DB::raw('DATE_FORMAT(loan_date, "%b %Y") as month_label'),
+                DB::raw('COUNT(*) as total_loans')
+            )
+            ->groupBy('month_number', 'month_label')
+            ->orderBy('month_number', 'asc')
+            ->get();
+
+            $chartLabels = $monthlyLoans->pluck('month_label')->toArray();
+            $chartData = $monthlyLoans->pluck('total_loans')->toArray();
+
+            if (empty($chartLabels)) {
+                $chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+                $chartData = [0, 0, 5, 0, 0, 0];
+            }
+
+            return view('dashboard', compact('stats', 'recentActivities', 'pendingLoans', 'chartLabels', 'chartData'));
         }
 
         // User View
