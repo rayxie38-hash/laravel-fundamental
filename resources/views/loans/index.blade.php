@@ -30,6 +30,7 @@
                             <option value="approved" {{ $status == 'approved' ? 'selected' : '' }}>Approved</option>
                             <option value="returned" {{ $status == 'returned' ? 'selected' : '' }}>Returned</option>
                             <option value="rejected" {{ $status == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                            <option value="overdue" {{ $status == 'overdue' ? 'selected' : '' }}>Overdue</option>
                         </select>
                         <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700">Filter</button>
                         @if($status)
@@ -83,7 +84,8 @@
                                             {{ $loan->status === 'approved' ? 'bg-green-100 text-green-800' : '' }}
                                             {{ $loan->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                             {{ $loan->status === 'returned' ? 'bg-blue-100 text-blue-800' : '' }}
-                                            {{ $loan->status === 'rejected' ? 'bg-red-100 text-red-800' : '' }}">
+                                            {{ $loan->status === 'rejected' ? 'bg-red-100 text-red-800' : '' }}
+                                            {{ $loan->status === 'overdue' ? 'bg-red-800 text-white font-bold' : '' }}">
                                             {{ ucfirst($loan->status) }}
                                         </span>
                                     </td>
