@@ -60,6 +60,14 @@ class ItemController extends Controller
 
     public function destroy(Request $request, Item $item)
     {
+        $activeLoansCount = $item->loans()
+            ->whereIn('status', ['pending', 'approved', 'overdue'])
+            ->count();
+
+        if ($activeLoansCount > 0) {
+            return redirect()->back()->with('error', 'Barang tidak dapat dihapus karena sedang dalam proses peminjaman aktif.');
+        }
+
         $itemName = $item->name;
         $itemCode = $item->code;
         $item->delete();

@@ -51,6 +51,10 @@ class CategoryController extends Controller
 
     public function destroy(Request $request, Category $category)
     {
+        if ($category->items()->count() > 0) {
+            return redirect()->back()->with('error', 'Kategori tidak dapat dihapus karena masih memiliki barang terikat.');
+        }
+
         $categoryName = $category->name;
         $category->delete();
 

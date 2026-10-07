@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreItemRequest extends FormRequest
 {
@@ -16,7 +17,12 @@ class StoreItemRequest extends FormRequest
         return [
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100|unique:items,code',
+            'code' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('items', 'code')->whereNull('deleted_at'),
+            ],
             'stock' => 'required|integer|min:0',
             'condition' => 'required|string|max:100',
         ];

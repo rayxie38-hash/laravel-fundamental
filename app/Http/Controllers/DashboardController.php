@@ -22,7 +22,7 @@ class DashboardController extends Controller
                 'total_categories' => Category::count(),
                 'total_items' => Item::count(),
                 'pending_loans' => Loan::where('status', 'pending')->count(),
-                'active_loans' => Loan::where('status', 'approved')->count(),
+                'active_loans' => Loan::whereIn('status', ['approved', 'overdue'])->count(),
             ];
 
             $recentActivities = ActivityLog::with('user')
@@ -36,12 +36,13 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
 
-            // Monthly loan counts for chart
+            // Monthly loan counts for chart (approved or returned loans)
             $monthlyLoans = Loan::select(
                 DB::raw('MONTH(loan_date) as month_number'),
                 DB::raw('DATE_FORMAT(loan_date, "%b %Y") as month_label'),
                 DB::raw('COUNT(*) as total_loans')
             )
+            ->whereIn('status', ['approved', 'returned', 'overdue'])
             ->groupBy('month_number', 'month_label')
             ->orderBy('month_number', 'asc')
             ->get();
@@ -51,7 +52,7 @@ class DashboardController extends Controller
 
             if (empty($chartLabels)) {
                 $chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-                $chartData = [0, 0, 5, 0, 0, 0];
+                $chartData = [0, 0, 3, 0, 0, 0];
             }
 
             return view('dashboard', compact('stats', 'recentActivities', 'pendingLoans', 'chartLabels', 'chartData'));
@@ -60,7 +61,7 @@ class DashboardController extends Controller
         // User View
         $stats = [
             'my_loans_count' => Loan::where('user_id', $user->id)->count(),
-            'my_active_loans' => Loan::where('user_id', $user->id)->where('status', 'approved')->count(),
+            'my_active_loans' => Loan::where('user_id', $user->id)->whereIn('status', ['approved', 'overdue'])->count(),
             'my_pending_loans' => Loan::where('user_id', $user->id)->where('status', 'pending')->count(),
             'available_items' => Item::where('stock', '>', 0)->count(),
         ];

@@ -80,6 +80,14 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'You cannot delete your own account.');
         }
 
+        $activeLoansCount = $user->loans()
+            ->whereIn('status', ['pending', 'approved', 'overdue'])
+            ->count();
+
+        if ($activeLoansCount > 0) {
+            return redirect()->back()->with('error', 'User tidak dapat dihapus karena masih memiliki peminjaman aktif.');
+        }
+
         $userName = $user->name;
         $user->delete();
 
